@@ -47,6 +47,8 @@ from src.answer.model.answer import Answer
 # config 
 from src.configration.model import answer_config
 
+# task
+from src.task.model import task
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
