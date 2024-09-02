@@ -1,6 +1,7 @@
 import uuid
 from datetime import datetime
 
+from sqlalchemy import Index
 from sqlalchemy.dialects.postgresql import UUID
 
 from src import db
@@ -8,11 +9,11 @@ from src import db
 
 class Task(db.Model):
     __tablename__ = "task"
-    id = db.Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    id: str = db.Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
 
     user_email: str = db.Column(db.String)
     case_id: int = db.Column(db.Integer)
-    path_config: str = db.Column(db.JSON, nullable=True)
+    path_config = db.Column(db.JSON, nullable=True)
     completed: bool = db.Column(db.Boolean, default=False)
     review_started_timestamp: datetime = db.Column(db.DateTime, nullable=True)
 
@@ -20,3 +21,5 @@ class Task(db.Model):
     modified_timestamp: datetime = db.Column(
         db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow
     )
+
+    __table_args__ = (Index(None, "user_email", "case_id"),)
