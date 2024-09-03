@@ -32,3 +32,6 @@ class UserRepository:
 
     def get_users(self):
         return self.session.query(User).all()
+
+    def get_active_users(self):
+        return self.session.query(User).filter(User.active).all()

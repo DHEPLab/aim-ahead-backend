@@ -98,3 +98,18 @@ def test_update_user(user_repository):
 
     user_repository.update_user(inserted_user.copy(active=True))
     assert user_repository.query_user_by_email(user.email).active == True
+
+
+def test_get_active_users(user_repository):
+    user_1 = User(name="123", email="tianmingren@heifengshan.com")
+    user_2 = User(name="123", email="zhuwujing@gaolaozhuang.com")
+    user_repository.create_user(user_1)
+    user_repository.create_user(user_2)
+    inserted_user = user_repository.query_user_by_email(user_1.email)
+    user_repository.update_user(inserted_user.copy(active=True))
+
+    active_users = user_repository.get_active_users()
+
+    assert len(active_users) == 1
+    assert active_users[0].email == user_1.email
+    assert active_users[0].active == True
