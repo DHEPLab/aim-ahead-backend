@@ -1,14 +1,13 @@
-from datetime import date
+from datetime import date, timedelta
+import random
 
 from src.cases.model.clinical_data.person.drug_exposure import DrugExposure
 from src.cases.model.clinical_data.person.measurement import Measurement
 from src.cases.model.clinical_data.person.observation import Observation
 from src.cases.model.clinical_data.person.person import Person
-from src.cases.model.clinical_data.person.visit_occurrence import \
-    VisitOccurrence
+from src.cases.model.clinical_data.person.visit_occurrence import VisitOccurrence
 from src.cases.model.vocabularies.concept import Concept
-from src.cases.model.vocabularies.concept_relationship import \
-    ConceptRelationship
+from src.cases.model.vocabularies.concept_relationship import ConceptRelationship
 from src.cases.model.vocabularies.relationship import Relationship
 
 
@@ -60,7 +59,7 @@ def person_fixture(person_id=1, gender_concept_id=2, race_concept_id=3):
 
 
 def visit_occurrence_fixture(
-    visit_occurrence_id=1, person_id=1, visit_concept_id=10, visit_type_concept_id=11
+        visit_occurrence_id=1, person_id=1, visit_concept_id=10, visit_type_concept_id=11
 ):
     return VisitOccurrence(
         visit_occurrence_id=visit_occurrence_id,
@@ -87,17 +86,17 @@ def drug_fixture(concept_id, drug_exposure_id=1, person_id=1, visit_id=1):
 
 
 def observation_fixture(
-    concept_id,
-    value_as_string=None,
-    value_as_number=None,
-    value_as_concept_id=None,
-    qualifier_concept_id=None,
-    unit_concept_id=None,
-    unit_source_value=None,
-    observation_type_concept_id=0,
-    observation_id=1,
-    person_id=1,
-    visit_id=1,
+        concept_id,
+        value_as_string=None,
+        value_as_number=None,
+        value_as_concept_id=None,
+        qualifier_concept_id=None,
+        unit_concept_id=None,
+        unit_source_value=None,
+        observation_type_concept_id=0,
+        observation_id=1,
+        person_id=1,
+        visit_id=1,
 ):
     return Observation(
         observation_id=observation_id,
@@ -116,15 +115,15 @@ def observation_fixture(
 
 
 def measurement_fixture(
-    concept_id,
-    operator_concept_id=None,
-    value_as_number=None,
-    value_as_concept_id=None,
-    unit_concept_id=None,
-    unit_source_value=None,
-    measurement_id=1,
-    person_id=1,
-    visit_id=1,
+        concept_id,
+        operator_concept_id=None,
+        value_as_number=None,
+        value_as_concept_id=None,
+        unit_concept_id=None,
+        unit_source_value=None,
+        measurement_id=1,
+        person_id=1,
+        visit_id=1,
 ):
     return Measurement(
         measurement_id=measurement_id,
@@ -141,7 +140,71 @@ def measurement_fixture(
     )
 
 
-def input_case(session):
+def generate_random_person(case_num):
+    return Person(
+        person_id=case_num + 1,
+        gender_concept_id=random.choice([8507, 8532]),
+        year_of_birth=random.randint(1940, 2010),
+        month_of_birth=random.randint(1, 12),
+        day_of_birth=random.randint(1, 28),
+        race_concept_id=random.randint(1, 5),
+        ethnicity_concept_id=random.randint(1, 3),
+        person_source_value=f'person_{case_num + 1}'
+    )
+
+
+def generate_random_visit(person_id):
+    start_date = date(2023, 1, 1) + timedelta(days=random.randint(0, 365))
+    end_date = start_date + timedelta(days=random.randint(1, 30))
+    return VisitOccurrence(
+        visit_occurrence_id=random.randint(1000, 9999),
+        person_id=person_id,
+        visit_concept_id=random.choice([9201, 9202, 9203]),
+        visit_start_date=start_date,
+        visit_end_date=end_date,
+        visit_type_concept_id=random.randint(1, 5)
+    )
+
+
+def generate_random_drugs(session, person_id, visit_id):
+    for _ in range(random.randint(1, 5)):
+        drug = drug_fixture(
+            concept_id=random.randint(1000, 2000),
+            drug_exposure_id=random.randint(10000, 99999),
+            person_id=person_id,
+            visit_id=visit_id
+        )
+        session.add(drug)
+
+
+def generate_random_observations(session, person_id, visit_id):
+    for _ in range(random.randint(1, 10)):
+        observation = observation_fixture(
+            concept_id=random.randint(3000, 4000),
+            value_as_string=random.choice([None, "Random Observation"]),
+            value_as_number=random.choice([None, random.uniform(0, 100)]),
+            value_as_concept_id=random.choice([None, random.randint(1, 100)]),
+            observation_id=random.randint(100000, 999999),
+            person_id=person_id,
+            visit_id=visit_id
+        )
+        session.add(observation)
+
+
+def generate_random_measurements(session, person_id, visit_id):
+    for _ in range(random.randint(1, 8)):
+        measurement = measurement_fixture(
+            concept_id=random.randint(5000, 6000),
+            value_as_number=random.uniform(0, 200),
+            unit_concept_id=random.randint(1, 10),
+            measurement_id=random.randint(1000000, 9999999),
+            person_id=person_id,
+            visit_id=visit_id
+        )
+        session.add(measurement)
+
+
+def generate_single_case(session):
     person = person_fixture()
     concept_of_person_gender = concept_fixture(person.gender_concept_id, "M")
     concept_of_person_race = concept_fixture(person.race_concept_id, "race")
@@ -394,3 +457,29 @@ def input_case(session):
         )
     )
     session.flush()
+
+
+def generate_random_case(session, case_num):
+    person = generate_random_person(case_num)
+    session.add(person)
+    session.flush()
+
+    visit = generate_random_visit(person.person_id)
+    session.add(visit)
+    session.flush()
+
+    generate_random_drugs(session, person.person_id, visit.visit_occurrence_id)
+    generate_random_observations(session, person.person_id, visit.visit_occurrence_id)
+    generate_random_measurements(session, person.person_id, visit.visit_occurrence_id)
+
+    session.flush()
+
+
+def input_case(session, num_cases=1):
+    for case_num in range(num_cases):
+        if case_num == 0:
+            generate_single_case(session)
+        else:
+            generate_random_case(session, case_num)
+
+
