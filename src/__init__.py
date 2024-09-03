@@ -1,6 +1,7 @@
 from os import path
 
 from flask import Flask
+from flask_apscheduler import APScheduler
 from flask_json_schema import JsonSchema
 from flask_jwt_extended import JWTManager
 from flask_migrate import Migrate, upgrade
@@ -11,6 +12,7 @@ from src.common.exception.exception_handlers import register_error_handlers
 db = SQLAlchemy()
 schema = JsonSchema()
 jwt = JWTManager()
+scheduler = APScheduler()
 
 
 def create_app(config_object=None):
@@ -27,6 +29,9 @@ def create_app(config_object=None):
     schema.init_app(app)
     db.init_app(app)
     jwt.init_app(app)
+    scheduler.init_app(app)
+    scheduler.start()
+
     Migrate(
         app, db, directory=path.join(path.dirname(path.abspath(__file__)), "migrations")
     )
@@ -57,5 +62,14 @@ def create_app(config_object=None):
         app.register_blueprint(answer_blueprint, url_prefix="/api")
 
         register_error_handlers(app)
+        from src.task.daily_task import create_daily_task
+
+        scheduler.add_job(
+            id="create_daily_task",
+            func=create_daily_task,
+            trigger="cron",
+            hour=0,
+            minute=0,
+        )
 
     return app
