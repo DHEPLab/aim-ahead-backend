@@ -1,3 +1,5 @@
+from typing import List
+
 from sqlalchemy import false
 
 from src.task.model.task import Task
@@ -6,6 +8,13 @@ from src.task.model.task import Task
 class TaskRepository:
     def __init__(self, session):
         self.session = session
+
+    def get_uncompleted_tasks_count_for_user(self, user_email: str) -> int:
+        return (
+            self.session.query(Task)
+            .filter(Task.user_email == user_email, Task.completed is False)
+            .count()
+        )
 
     def create_task(self, task: Task):
         self.session.add(task)
@@ -21,3 +30,11 @@ class TaskRepository:
             .filter(Task.user_email == user_email, Task.completed == false())
             .first()
         )
+
+    def get_assigned_case_ids_for_user(self, user_email: str) -> List[int]:
+        return [
+            task.case_id
+            for task in self.session.query(Task.case_id)
+            .filter(Task.user_email == user_email)
+            .distinct()
+        ]
