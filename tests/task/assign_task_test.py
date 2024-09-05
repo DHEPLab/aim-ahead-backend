@@ -82,3 +82,8 @@ def test_random_distribution(task_assignment_service, setup_database):
         assignments.append(task.case_id)
 
     assert len(set(assignments)) > 1, "Assignments are not random"
+
+def test_get_instance_before_initialization():
+    AssignTask._instance = None
+    with pytest.raises(Exception, match="AssignTask must be initialized before use"):
+        AssignTask.get_instance()
