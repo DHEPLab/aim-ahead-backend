@@ -21,6 +21,8 @@ from src.task.repository.task_repository import TaskRepository
 from src.user.repository.display_config_repository import \
     DisplayConfigRepository
 from src.user.utils.auth_utils import get_user_email_from_jwt
+from task.assign_task import AssignTask
+from user.repository.user_repository import UserRepository
 
 
 def group_by(source_list, key_selector):
@@ -92,7 +94,9 @@ class CaseService:
         configuration_repository: DisplayConfigRepository,
         system_config_repository: SystemConfigRepository,
         task_repository: TaskRepository,
+        user_repository: UserRepository,
     ):
+        self.user_repository = None
         self.person = None
         self.visit_occurrence_repository = visit_occurrence_repository
         self.concept_repository = concept_repository
@@ -103,6 +107,10 @@ class CaseService:
         self.configuration_repository = configuration_repository
         self.system_config_repository = system_config_repository
         self.task_repository = task_repository
+        self.user_repository = user_repository
+        AssignTask.initialize(
+            user_repository, task_repository, visit_occurrence_repository
+        )
 
     def get_case_detail(self, case_id):
         page_config = self.get_page_configuration()
@@ -275,7 +283,8 @@ class CaseService:
         )
 
     def get_cases_by_user(self, user_email) -> list[CaseSummary]:
-        # TODO call random assign case function
+        assign_task = AssignTask.get_instance()
+        assign_task.random_assign_task_to_user(user_email)
 
         task = self.task_repository.get_task_by_user(user_email)
         if not task:

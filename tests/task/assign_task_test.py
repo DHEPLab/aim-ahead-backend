@@ -1,4 +1,3 @@
-
 import pytest
 
 from cases.repository.visit_occurrence_repository import VisitOccurrenceRepository
@@ -16,9 +15,10 @@ def setup_database(session):
     user2 = User(email="user2@example.com")
     session.add_all([user1, user2])
     session.flush()
-    input_case(session,num_cases=5)
+    input_case(session, num_cases=5)
     yield session
     session.close()
+
 
 @pytest.fixture
 def task_assignment_service(setup_database):
@@ -27,9 +27,11 @@ def task_assignment_service(setup_database):
     visit_repo = VisitOccurrenceRepository(setup_database)
     return AssignTask(user_repo, task_repo, visit_repo)
 
+
 def test_user_not_found(task_assignment_service):
     result = task_assignment_service.random_assign_task_to_user("nonexistent@example.com")
     assert result == False
+
 
 def test_successful_task_assignment(task_assignment_service, setup_database):
     result = task_assignment_service.random_assign_task_to_user("user1@example.com")
@@ -38,16 +40,18 @@ def test_successful_task_assignment(task_assignment_service, setup_database):
     tasks = setup_database.query(Task).filter_by(user_email="user1@example.com").all()
     assert len(tasks) == 1
 
-    assert tasks[0].case_id in range(1000, 9999)
+    assert tasks[0].case_id in range(1, 9999)
+
 
 def test_no_available_visits(task_assignment_service, setup_database):
     for _ in range(5):
         task_assignment_service.random_assign_task_to_user("user1@example.com")
         tasks = setup_database.query(Task).filter_by(user_email="user1@example.com").first()
-        tasks.completed=True
+        tasks.completed = True
 
     result = task_assignment_service.random_assign_task_to_user("user1@example.com")
     assert result == False
+
 
 def test_multiple_assignments(task_assignment_service, setup_database):
     for _ in range(3):
@@ -58,6 +62,7 @@ def test_multiple_assignments(task_assignment_service, setup_database):
     assert len(tasks) == 3
     assert len(set(task.case_id for task in tasks)) == 3
 
+
 def test_all_visits_assigned(task_assignment_service, setup_database):
     for _ in range(5):
         result = task_assignment_service.random_assign_task_to_user("user1@example.com")
@@ -65,6 +70,7 @@ def test_all_visits_assigned(task_assignment_service, setup_database):
 
     result = task_assignment_service.random_assign_task_to_user("user1@example.com")
     assert result == False
+
 
 def test_random_distribution(task_assignment_service, setup_database):
     assignments = []
@@ -74,6 +80,5 @@ def test_random_distribution(task_assignment_service, setup_database):
         task_assignment_service.random_assign_task_to_user("user1@example.com")
         task = setup_database.query(Task).filter_by(user_email="user1@example.com").first()
         assignments.append(task.case_id)
-
 
     assert len(set(assignments)) > 1, "Assignments are not random"

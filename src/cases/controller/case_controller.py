@@ -16,6 +16,7 @@ from src.common.repository.system_config_repository import \
 from src.task.repository.task_repository import TaskRepository
 from src.user.repository.display_config_repository import \
     DisplayConfigRepository
+from src.user.repository.user_repository import UserRepository
 from src.user.utils import auth_utils
 from src.user.utils.auth_utils import jwt_validation_required
 
@@ -29,6 +30,7 @@ drug_exposure_repository = DrugExposureRepository(db.session)
 configuration_repository = DisplayConfigRepository(db.session)
 system_config_repository = SystemConfigRepository(db.session)
 task_repository = TaskRepository(db.session)
+user_repository = UserRepository(db.session)
 case_service = CaseService(
     visit_occurrence_repository=visit_occurrence_repository,
     concept_repository=concept_repository,
@@ -39,6 +41,7 @@ case_service = CaseService(
     configuration_repository=configuration_repository,
     system_config_repository=system_config_repository,
     task_repository=task_repository,
+    user_repository=user_repository,
 )
 
 

@@ -29,6 +29,7 @@ from src.user.repository.display_config_repository import \
 from tests.cases.case_fixture import (concept_fixture, measurement_fixture,
                                       observation_fixture, person_fixture,
                                       visit_occurrence_fixture)
+from user.repository.user_repository import UserRepository
 
 
 class TestGroupBy:
@@ -186,6 +187,7 @@ def mock_repos(mocker):
     concept_repository = mocker.Mock(ConceptRepository)
     system_config_repository = mocker.Mock(SystemConfigRepository)
     task_repository = mocker.Mock(TaskRepository)
+    user_repository = mocker.Mock(UserRepository)
     mocker.patch('src.cases.service.case_service.get_user_email_from_jwt', return_value='goodbye@sunwukong.com')
 
     visit_occurrence_repository.get_visit_occurrence.return_value = (
@@ -233,7 +235,8 @@ def mock_repos(mocker):
         person_repository,
         visit_occurrence_repository,
         system_config_repository,
-        task_repository
+        task_repository,
+        user_repository
     )
 
 
@@ -265,6 +268,7 @@ class TestGetCaseDetail:
             visit_occurrence_repository,
             system_config_repository,
             task_repository,
+            user_repository
         ) = mock_repos(mocker)
 
         case_service = CaseService(
@@ -276,7 +280,9 @@ class TestGetCaseDetail:
             drug_exposure_repository=drug_exposure_repository,
             configuration_repository=configuration_repository,
             system_config_repository=system_config_repository,
-            task_repository=task_repository)
+            task_repository=task_repository,
+            user_repository=user_repository
+        )
 
         # When
         detail = case_service.get_case_detail(1)
@@ -306,6 +312,7 @@ class TestGetCaseDetail:
             visit_occurrence_repository,
             system_config_repository,
             task_repository,
+            user_repository
         ) = mock_repos(mocker)
 
         observation_repository.get_observations_by_concept.return_value = [
@@ -321,7 +328,8 @@ class TestGetCaseDetail:
             drug_exposure_repository=drug_exposure_repository,
             configuration_repository=configuration_repository,
             system_config_repository=system_config_repository,
-            task_repository=task_repository
+            task_repository=task_repository,
+            user_repository=user_repository
         )
 
         # When
@@ -348,6 +356,7 @@ class TestGetCaseDetail:
             visit_occurrence_repository,
             system_config_repository,
             task_repository,
+            user_repository
         ) = mock_repos(mocker)
 
         observation_repository.get_observations_by_type.return_value = [
@@ -364,6 +373,7 @@ class TestGetCaseDetail:
             configuration_repository=configuration_repository,
             system_config_repository=system_config_repository,
             task_repository=task_repository,
+            user_repository=user_repository
         )
 
         # When
@@ -387,6 +397,7 @@ class TestGetCaseDetail:
             visit_occurrence_repository,
             system_config_repository,
             task_repository,
+            user_repository
         ) = mock_repos(mocker)
 
         concept_repository.get_concept.side_effect = mock_concept_func
@@ -403,7 +414,8 @@ class TestGetCaseDetail:
             drug_exposure_repository=drug_exposure_repository,
             configuration_repository=configuration_repository,
             system_config_repository=system_config_repository,
-            task_repository=task_repository
+            task_repository=task_repository,
+            user_repository=user_repository
         )
 
         # When
@@ -439,6 +451,7 @@ class TestGetCaseDetail:
             visit_occurrence_repository,
             system_config_repository,
             task_repository,
+            user_repository
         ) = mock_repos(mocker)
 
         concept_repository.get_concept.side_effect = mock_concept_func
@@ -455,7 +468,8 @@ class TestGetCaseDetail:
             drug_exposure_repository=drug_exposure_repository,
             configuration_repository=configuration_repository,
             system_config_repository=system_config_repository,
-            task_repository=task_repository
+            task_repository=task_repository,
+            user_repository=user_repository
         )
 
         # When
@@ -493,6 +507,7 @@ class TestGetValue:
             visit_occurrence_repository,
             system_config_repository,
             task_repository,
+            user_repository
         ) = mock_repos(mocker)
 
         case_service = CaseService(
@@ -505,6 +520,7 @@ class TestGetValue:
             configuration_repository=configuration_repository,
             system_config_repository=system_config_repository,
             task_repository=task_repository,
+            user_repository=user_repository
         )
         observation_family_history_with_string = observation_fixture(
             concept_id=4167217,
@@ -535,6 +551,7 @@ class TestGetValue:
             visit_occurrence_repository,
             system_config_repository,
             task_repository,
+            user_repository
         ) = mock_repos(mocker)
 
         case_service = CaseService(
@@ -546,7 +563,8 @@ class TestGetValue:
             drug_exposure_repository=drug_exposure_repository,
             configuration_repository=configuration_repository,
             system_config_repository=system_config_repository,
-            task_repository=task_repository
+            task_repository=task_repository,
+            user_repository=user_repository
         )
         observation_family_history_with_number = observation_fixture(
             concept_id=4167217,
@@ -577,6 +595,7 @@ class TestGetValue:
             visit_occurrence_repository,
             system_config_repository,
             task_repository,
+            user_repository
         ) = mock_repos(mocker)
 
         case_service = CaseService(
@@ -588,7 +607,8 @@ class TestGetValue:
             drug_exposure_repository=drug_exposure_repository,
             configuration_repository=configuration_repository,
             system_config_repository=system_config_repository,
-            task_repository=task_repository
+            task_repository=task_repository,
+            user_repository=user_repository
         )
         observation_family_history_with_concept = observation_fixture(
             concept_id=4167217,
@@ -619,6 +639,7 @@ class TestGetValue:
             visit_occurrence_repository,
             system_config_repository,
             task_repository,
+            user_repository
         ) = mock_repos(mocker)
 
         case_service = CaseService(
@@ -631,6 +652,7 @@ class TestGetValue:
             configuration_repository=configuration_repository,
             system_config_repository=system_config_repository,
             task_repository=task_repository,
+            user_repository=user_repository
         )
         observation_family_history_with_unit = observation_fixture(
             concept_id=4167217,
@@ -662,6 +684,7 @@ class TestGetValue:
             visit_occurrence_repository,
             system_config_repository,
             task_repository,
+            user_repository
         ) = mock_repos(mocker)
 
         case_service = CaseService(
@@ -673,7 +696,8 @@ class TestGetValue:
             drug_exposure_repository=drug_exposure_repository,
             configuration_repository=configuration_repository,
             system_config_repository=system_config_repository,
-            task_repository=task_repository
+            task_repository=task_repository,
+            user_repository=user_repository
         )
         observation_family_history_with_qualifier = observation_fixture(
             concept_id=4167217,
@@ -705,6 +729,7 @@ class TestGetValue:
             visit_occurrence_repository,
             system_config_repository,
             task_repository,
+            user_repository
         ) = mock_repos(mocker)
 
         case_service = CaseService(
@@ -716,7 +741,8 @@ class TestGetValue:
             drug_exposure_repository=drug_exposure_repository,
             configuration_repository=configuration_repository,
             system_config_repository=system_config_repository,
-            task_repository=task_repository
+            task_repository=task_repository,
+            user_repository=user_repository
         )
         observation_family_history_with_qualifier = observation_fixture(
             concept_id=4167217,
@@ -748,6 +774,7 @@ class TestGetValue:
             visit_occurrence_repository,
             system_config_repository,
             task_repository,
+            user_repository
         ) = mock_repos(mocker)
 
         case_service = CaseService(
@@ -759,7 +786,8 @@ class TestGetValue:
             drug_exposure_repository=drug_exposure_repository,
             configuration_repository=configuration_repository,
             system_config_repository=system_config_repository,
-            task_repository=task_repository
+            task_repository=task_repository,
+            user_repository=user_repository
         )
         measurement_vital_signs_pulse_rate_with_number = measurement_fixture(
             concept_id=40,
@@ -791,6 +819,7 @@ class TestGetValue:
             visit_occurrence_repository,
             system_config_repository,
             task_repository,
+            user_repository
         ) = mock_repos(mocker)
 
         case_service = CaseService(
@@ -803,6 +832,7 @@ class TestGetValue:
             configuration_repository=configuration_repository,
             system_config_repository=system_config_repository,
             task_repository=task_repository,
+            user_repository=user_repository
         )
         measurement_vital_signs_bp_with_concept = measurement_fixture(
             concept_id=43,
@@ -834,6 +864,7 @@ class TestGetValue:
             visit_occurrence_repository,
             system_config_repository,
             task_repository,
+            user_repository
         ) = mock_repos(mocker)
 
         case_service = CaseService(
@@ -845,7 +876,8 @@ class TestGetValue:
             drug_exposure_repository=drug_exposure_repository,
             configuration_repository=configuration_repository,
             system_config_repository=system_config_repository,
-            task_repository=task_repository
+            task_repository=task_repository,
+            user_repository=user_repository
         )
         measurement_vital_signs_bp_with_concept = measurement_fixture(
             concept_id=43,
@@ -878,6 +910,7 @@ class TestGetCaseReview:
             visit_occurrence_repository,
             system_config_repository,
             task_repository,
+            user_repository
         ) = mock_repos(mocker)
         task_repository.get_task.return_value = Task(id='101', case_id=1, user_email='goodbye@sunwukong.com', completed=False, path_config=[
             {
@@ -895,7 +928,7 @@ class TestGetCaseReview:
             drug_exposure_repository=drug_exposure_repository,
             configuration_repository=configuration_repository,
             system_config_repository=system_config_repository,
-            task_repository=task_repository,
+            task_repository=task_repository,user_repository=user_repository
         )
 
         case_review = case_service.get_case_review(1)
@@ -929,6 +962,7 @@ class TestGetCaseReview:
             visit_occurrence_repository,
             system_config_repository,
             task_repository,
+            user_repository
         ) = mock_repos(mocker)
         task_repository.get_task.return_value = Task(id='101', case_id=1, user_email='goodbye@sunwukong.com', completed=False)
         configuration_repository.get_all_configurations.return_value = []
@@ -941,7 +975,8 @@ class TestGetCaseReview:
             drug_exposure_repository=drug_exposure_repository,
             configuration_repository=configuration_repository,
             system_config_repository=system_config_repository,
-            task_repository=task_repository
+            task_repository=task_repository,
+            user_repository=user_repository
         )
 
         case_review = case_service.get_case_review(1)
@@ -974,6 +1009,7 @@ class TestGetCaseReview:
             visit_occurrence_repository,
             system_config_repository,
             task_repository,
+            user_repository
         ) = mock_repos(mocker)
         task_repository.get_task.return_value = Task(id='101', case_id=1, user_email='goodbye@sunwukong.com', completed=False)
         configuration_repository.get_all_configurations.return_value = [DisplayConfig(
@@ -995,7 +1031,8 @@ class TestGetCaseReview:
             drug_exposure_repository=drug_exposure_repository,
             configuration_repository=configuration_repository,
             system_config_repository=system_config_repository,
-            task_repository=task_repository
+            task_repository=task_repository,
+            user_repository=user_repository
         )
 
         case_review = case_service.get_case_review(1)
@@ -1029,6 +1066,7 @@ class TestGetCaseReview:
             visit_occurrence_repository,
             system_config_repository,
             task_repository,
+            user_repository
         ) = mock_repos(mocker)
         task_repository.get_task.return_value = None
         case_service = CaseService(
@@ -1040,7 +1078,8 @@ class TestGetCaseReview:
             drug_exposure_repository=drug_exposure_repository,
             configuration_repository=configuration_repository,
             system_config_repository=system_config_repository,
-            task_repository=task_repository
+            task_repository=task_repository,
+            user_repository=user_repository
         )
 
         with pytest.raises(BusinessException, match=re.compile(BusinessExceptionEnum.NoAccessToCaseReview.name)):
@@ -1057,6 +1096,7 @@ class TestGetCaseReview:
             visit_occurrence_repository,
             system_config_repository,
             task_repository,
+            user_repository
         ) = mock_repos(mocker)
         task_repository.get_task.return_value = Task(id='101', case_id=1, user_email='goodbye@sunwukong.com', completed=False, path_config=[
             {
@@ -1081,7 +1121,8 @@ class TestGetCaseReview:
             drug_exposure_repository=drug_exposure_repository,
             configuration_repository=configuration_repository,
             system_config_repository=system_config_repository,
-            task_repository=task_repository
+            task_repository=task_repository,
+            user_repository=user_repository
         )
 
         case_review = case_service.get_case_review(1)
@@ -1143,7 +1184,7 @@ class TestGetCaseSummary:
             visit_occurrence_repository,
             system_config_repository,
             task_repository,
-
+            user_repository
         ) = mock_repos(mocker)
         task_repository.get_task_by_user.return_value = []
         visit_occurrence_repository.get_visit_occurrence.return_value = None
@@ -1158,7 +1199,8 @@ class TestGetCaseSummary:
             drug_exposure_repository=drug_exposure_repository,
             configuration_repository=configuration_repository,
             system_config_repository=system_config_repository,
-            task_repository=task_repository
+            task_repository=task_repository,
+            user_repository=user_repository
         )
 
         assert case_service.get_cases_by_user("user@example.com") == []
@@ -1174,6 +1216,7 @@ class TestGetCaseSummary:
             visit_occurrence_repository,
             system_config_repository,
             task_repository,
+            user_repository
         ) = mock_repos(mocker)
 
         concept_mapping = {
@@ -1202,7 +1245,8 @@ class TestGetCaseSummary:
             drug_exposure_repository=drug_exposure_repository,
             configuration_repository=configuration_repository,
             system_config_repository=system_config_repository,
-            task_repository=task_repository
+            task_repository=task_repository,
+            user_repository=user_repository
         )
         result = case_service.get_cases_by_user("user@example.com")
         expected = [CaseSummary(task_id="101", case_id=1, age="36", gender='Male', patient_chief_complaint='Headache')]
@@ -1221,6 +1265,7 @@ class TestGetCaseSummary:
             visit_occurrence_repository,
             system_config_repository,
             task_repository,
+            user_repository
         ) = mock_repos(mocker)
         case_service = CaseService(
             visit_occurrence_repository=visit_occurrence_repository,
@@ -1231,7 +1276,8 @@ class TestGetCaseSummary:
             drug_exposure_repository=drug_exposure_repository,
             configuration_repository=configuration_repository,
             system_config_repository=system_config_repository,
-            task_repository=task_repository
+            task_repository=task_repository,
+            user_repository=user_repository
         )
         # Setup complex observation data
         observation_mapping = {

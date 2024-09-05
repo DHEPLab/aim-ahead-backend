@@ -10,6 +10,26 @@ from src.user.repository.user_repository import UserRepository
 
 
 class AssignTask:
+    _instance = None
+
+    @classmethod
+    def initialize(
+        cls,
+        user_repository: UserRepository,
+        task_repository: TaskRepository,
+        visit_occurrence_repository: VisitOccurrenceRepository,
+    ):
+        if cls._instance is None:
+            cls._instance = cls(
+                user_repository, task_repository, visit_occurrence_repository
+            )
+
+    @classmethod
+    def get_instance(cls):
+        if cls._instance is None:
+            raise Exception("AssignTask must be initialized before use")
+        return cls._instance
+
     def __init__(
         self,
         user_repository: UserRepository,
