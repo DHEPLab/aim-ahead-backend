@@ -984,8 +984,7 @@ class TestGetCaseReview:
                 },
                 {"path": "no path", "style": {"collapse": True}},
             ],
-            user_email='goodbye@sunwukong.com',
-            case_id=1
+            id=1
         )]
         case_service = CaseService(
             visit_occurrence_repository=visit_occurrence_repository,

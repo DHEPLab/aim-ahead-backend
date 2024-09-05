@@ -7,41 +7,22 @@ from src.common.exception.BusinessException import (BusinessException,
                                                     BusinessExceptionEnum)
 from src.user.model.display_config import DisplayConfig
 
-H_USER = "User"
-H_CASE = "Case No."
+H_ID = "Config ID"
 H_PATH = "Path"
 H_COLLAPSE = "Collapse"
 H_HIGHLIGHT = "Highlight"
 H_TOP = "Top"
 
 
-def is_empty(value):
-    return value is None or value == ""
+def is_empty(value: str):
+    return value is None or value.strip() == ""
 
 
 def str_to_bool(value):
     return True if value.lower() == "true" else False
 
 
-def validate_and_extract_user_case(row):
-    user, case = row[H_USER], row[H_CASE]
-
-    if not user:
-        raise BusinessException(BusinessExceptionEnum.InvalidUserEmail)
-    if not case:
-        raise BusinessException(BusinessExceptionEnum.InvalidCaseId)
-
-    return user, case
-
-
-def validate_and_convert_case_id(case):
-    try:
-        return int(case)
-    except (ValueError, TypeError):
-        raise BusinessException(BusinessExceptionEnum.InvalidCaseId)
-
-
-def validate_and_convert_top(row):
+def validate_top(row):
     path, top = row[H_PATH], row[H_TOP]
 
     if not is_empty(top):
@@ -50,7 +31,7 @@ def validate_and_convert_top(row):
             raise BusinessException(BusinessExceptionEnum.ConfigFileIncorrect)
         # The top config only allow number as input.
         try:
-            return float(top)
+            float(top)
         except (ValueError, TypeError):
             raise BusinessException(BusinessExceptionEnum.ConfigFileIncorrect)
 
@@ -76,31 +57,31 @@ class CsvConfigurationParser:
 
     def parse(self) -> List[DisplayConfig]:
         configurations = []
+        p_id = None
 
         for row in self.csv_data:
-            user, case = validate_and_extract_user_case(row)
-            case_id = validate_and_convert_case_id(case)
-            top = validate_and_convert_top(row)
+            validate_top(row)
 
-            if self._should_create_new_config(user, case_id):
-                self.current_config = DisplayConfig(
-                    user_email=user, case_id=case_id, path_config=[]
-                )
+            id = row[H_ID]
+            if self._should_create_new_config(p_id, id):
+                p_id = id
+                self.current_config = DisplayConfig(id=id, path_config=[])
                 configurations.append(self.current_config)
 
-            self._process_path_config(row, top)
+            self._process_path_config(row)
 
         return configurations
 
-    def _should_create_new_config(self, user, case_id):
-        return (
-            self.current_config is None
-            or self.current_config.user_email != user
-            or self.current_config.case_id != case_id
-        )
+    def _should_create_new_config(self, p_id, id):
+        return not is_empty(id) and p_id != id
 
-    def _process_path_config(self, row, top):
-        path, collapse, highlight = row[H_PATH], row[H_COLLAPSE], row[H_HIGHLIGHT]
+    def _process_path_config(self, row):
+        path, collapse, highlight, top = (
+            row[H_PATH],
+            row[H_COLLAPSE],
+            row[H_HIGHLIGHT],
+            row[H_TOP],
+        )
 
         if not is_empty(path):
             style = build_style_dict(collapse, highlight, top)
