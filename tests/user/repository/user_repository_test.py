@@ -7,7 +7,10 @@ from src.user.model.user import User
 
 @pytest.fixture(scope="session")
 def user_repository(session):
-    return UserRepository(session)
+    repo=UserRepository(session)
+    session.query(User).delete()
+    session.commit()
+    return repo
 
 
 def test_create_user(user_repository: UserRepository):
