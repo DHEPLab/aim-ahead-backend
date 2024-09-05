@@ -9,13 +9,6 @@ class TaskRepository:
     def __init__(self, session):
         self.session = session
 
-    def get_uncompleted_tasks_count_for_user(self, user_email: str) -> int:
-        return (
-            self.session.query(Task)
-            .filter(Task.user_email == user_email, Task.completed is False)
-            .count()
-        )
-
     def create_task(self, task: Task):
         self.session.add(task)
         self.session.flush()
