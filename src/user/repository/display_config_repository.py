@@ -1,6 +1,6 @@
 import json
 import uuid
-from typing import List, Tuple
+from typing import List
 
 from src.user.model.display_config import DisplayConfig
 
@@ -28,15 +28,3 @@ class DisplayConfigRepository:
 
     def get_all_configurations(self) -> List[DisplayConfig]:
         return self.session.query(DisplayConfig).all()
-
-    def get_configuration_by_id(self, config_id) -> DisplayConfig:
-        return self.session.get(DisplayConfig, config_id)
-
-    def get_case_configurations_by_user(self, user_email: str) -> List[Tuple[int, str]]:
-        configurations = (
-            self.session.query(DisplayConfig.case_id, DisplayConfig.id)
-            .filter(DisplayConfig.user_email == user_email)
-            .all()
-        )
-
-        return [(config.case_id, config.id) for config in configurations]

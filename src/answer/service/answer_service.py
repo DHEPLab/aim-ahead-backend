@@ -4,8 +4,7 @@ from src.common.exception.BusinessException import (BusinessException,
                                                     BusinessExceptionEnum)
 from src.configration.repository.answer_config_repository import \
     AnswerConfigurationRepository
-from src.user.repository.display_config_repository import \
-    DisplayConfigRepository
+from src.task.repository.task_repository import TaskRepository
 from src.user.utils import auth_utils
 
 
@@ -13,22 +12,20 @@ class AnswerService:
     def __init__(
         self,
         answer_repository: AnswerRepository,
-        configuration_repository: DisplayConfigRepository,
         answer_config_repository: AnswerConfigurationRepository,
+        task_repository: TaskRepository,
     ):
         self.answer_repository = answer_repository
-        self.configuration_repository = configuration_repository
         self.answer_config_repository = answer_config_repository
+        self.task_repository = task_repository
 
-    def add_answer_response(self, task_id: int, data: dict):
-        user_eamil = auth_utils.get_user_email_from_jwt()
-
+    def add_answer_response(self, task_id: str, data: dict):
+        user_email = auth_utils.get_user_email_from_jwt()
         answer = data["answer"]
         answer_config_id = data["answerConfigId"]
 
-        configuration = self.configuration_repository.get_configuration_by_id(task_id)
-
-        if not configuration or configuration.user_email != user_eamil:
+        task = self.task_repository.get_task(task_id)
+        if not task or task.user_email != user_email:
             raise BusinessException(BusinessExceptionEnum.NoAccessToCaseReview)
 
         answer_config = self.answer_config_repository.get_answer_config(
@@ -37,13 +34,14 @@ class AnswerService:
         if answer_config is None:
             raise BusinessException(BusinessExceptionEnum.NoAnswerConfigAvailable)
 
-        diagnose = Answer(
-            task_id=task_id,
-            case_id=configuration.case_id,
-            user_email=user_eamil,
-            display_configuration=configuration.path_config,
-            answer_config_id=answer_config.id,
-            answer=answer,
+        answer_saved = self.answer_repository.add_answer(
+            Answer(
+                task_id=task_id,
+                case_id=task.case_id,
+                answer_config_id=answer_config.id,
+                answer=answer,
+            )
         )
+        task.completed = True
 
-        return self.answer_repository.add_answer(diagnose)
+        return answer_saved

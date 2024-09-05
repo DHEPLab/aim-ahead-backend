@@ -7,13 +7,13 @@ from src.configration.model.answer_config import AnswerConfig
 from src.configration.repository.answer_config_repository import AnswerConfigurationRepository
 from src.answer.repository.answer_repository import AnswerRepository
 from src.answer.service.answer_service import AnswerService
-from src.user.model.display_config import DisplayConfig
-from src.user.repository.display_config_repository import DisplayConfigRepository
+from src.task.model.task import Task
+from src.task.repository.task_repository import TaskRepository
 
 
 @pytest.fixture
 def task_id():
-    return 1
+    return '1'
 
 
 @pytest.fixture
@@ -30,13 +30,13 @@ def dict_data():
 
 
 @pytest.fixture()
-def mock_diagnose_repo(mocker):
+def mock_answer_repo(mocker):
     return mocker.Mock(AnswerRepository)
 
 
 @pytest.fixture()
-def mock_configuration_repo(mocker):
-    return mocker.Mock(DisplayConfigRepository)
+def mock_task_repo(mocker):
+    return mocker.Mock(TaskRepository)
 
 
 @pytest.fixture()
@@ -49,66 +49,60 @@ def before_each_tests(mocker, user_email):
     mocker.patch('src.user.utils.auth_utils.get_user_email_from_jwt', return_value=user_email)
 
 
-def test_add_diagnose_response(
+def test_add_answer_response(
         task_id,
         user_email,
         dict_data,
-        mock_diagnose_repo,
-        mock_configuration_repo,
+        mock_answer_repo,
+        mock_task_repo,
         mock_answer_config_repo
 ):
-    mock_configuration_repo.get_configuration_by_id.return_value = DisplayConfig(
-        path_config=[],
-        user_email=user_email,
-        case_id=1
-    )
+    task = Task(path_config=[], user_email=user_email, case_id=1)
+    mock_task_repo.get_task.return_value = task
     mock_answer_config_repo.get_answer_config.return_value = AnswerConfig(
         id=dict_data["answerConfigId"],
         config=[{"type": "Text", "title": "title"}],
         created_timestamp=datetime.now()
     )
-    diagnose_service = AnswerService(mock_diagnose_repo, mock_configuration_repo, mock_answer_config_repo)
+    answer_service = AnswerService(mock_answer_repo, mock_answer_config_repo, mock_task_repo)
 
-    diagnose_service.add_answer_response(task_id, dict_data)
+    answer_service.add_answer_response(task_id, dict_data)
 
-    assert mock_diagnose_repo.add_answer.called
+    assert mock_answer_repo.add_answer.called
+    assert task.completed
 
 
-def test_add_diagnose_response_user_and_case_not_match(
+def test_add_answer_response_failed_when_user_and_case_not_match(
         task_id,
         dict_data,
-        mock_diagnose_repo,
-        mock_configuration_repo,
+        mock_answer_repo,
+        mock_task_repo,
         mock_answer_config_repo
 ):
-    mock_configuration_repo.get_configuration_by_id.return_value = DisplayConfig(
+    mock_task_repo.get_task.return_value = Task(
         path_config=[],
         user_email="user-not-match@test.com",
         case_id=1
     )
 
-    diagnose_service = AnswerService(mock_diagnose_repo, mock_configuration_repo, mock_answer_config_repo)
+    answer_service = AnswerService(mock_answer_repo, mock_answer_config_repo, mock_task_repo)
 
     with pytest.raises(BusinessException, match=re.compile(BusinessExceptionEnum.NoAccessToCaseReview.name)):
-        diagnose_service.add_answer_response(task_id, dict_data)
+        answer_service.add_answer_response(task_id, dict_data)
 
 
-def test_add_diagnose_response_failed_with_no_answer_config(
+def test_add_answer_response_failed_with_no_answer_config(
         task_id,
         user_email,
         dict_data,
-        mock_diagnose_repo,
-        mock_configuration_repo,
+        mock_answer_repo,
+        mock_task_repo,
         mock_answer_config_repo
 ):
-    mock_configuration_repo.get_configuration_by_id.return_value = DisplayConfig(
-        path_config=[],
-        user_email=user_email,
-        case_id=1
-    )
+    mock_task_repo.get_task.return_value = Task(path_config=[], user_email=user_email, case_id=1)
     mock_answer_config_repo.get_answer_config.return_value = None
 
-    diagnose_service = AnswerService(mock_diagnose_repo, mock_configuration_repo, mock_answer_config_repo)
+    answer_service = AnswerService(mock_answer_repo, mock_answer_config_repo, mock_task_repo)
 
     with pytest.raises(BusinessException, match=re.compile(BusinessExceptionEnum.NoAnswerConfigAvailable.name)):
-        diagnose_service.add_answer_response(task_id, dict_data)
+        answer_service.add_answer_response(task_id, dict_data)

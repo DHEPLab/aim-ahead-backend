@@ -6,16 +6,15 @@ from src.answer.service.answer_service import AnswerService
 from src.common.model.ApiResponse import ApiResponse
 from src.configration.repository.answer_config_repository import \
     AnswerConfigurationRepository
-from src.user.repository.display_config_repository import \
-    DisplayConfigRepository
+from src.task.repository.task_repository import TaskRepository
 from src.user.utils.auth_utils import jwt_validation_required
 
 answer_blueprint = Blueprint("answer", __name__)
 
 answer_service = AnswerService(
     answer_repository=AnswerRepository(db.session),
-    configuration_repository=DisplayConfigRepository(db.session),
     answer_config_repository=AnswerConfigurationRepository(db.session),
+    task_repository=TaskRepository(db.session),
 )
 
 

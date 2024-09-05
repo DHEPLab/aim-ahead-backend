@@ -2,19 +2,18 @@ import json
 
 from src.cases.controller.response.case_summary import CaseSummary
 from src.common.model.system_config import SystemConfig
-from src.user.model.display_config import DisplayConfig
+from src.task.model.task import Task
 from tests.cases.case_fixture import input_case
 
 
 def test_get_case_review(client, session, mocker):
     input_case(session)
-    config = DisplayConfig(
+    task = Task(
         user_email='goodbye@sunwukong.com',
         case_id=1,
-        id='1',
     )
     session.add(
-        config
+        task
     )
     session.add(
         SystemConfig(
@@ -43,8 +42,8 @@ def test_get_case_review(client, session, mocker):
     session.flush()
     mocker.patch('src.user.utils.auth_utils.validate_jwt_and_refresh', return_value=None)
     mocker.patch('src.cases.service.case_service.get_user_email_from_jwt', return_value='goodbye@sunwukong.com')
-    config_id = config.id
-    response = client.get(f"/api/case-reviews/{config_id}")
+    task_id = task.id
+    response = client.get(f"/api/case-reviews/{task_id}")
 
     assert response.status_code == 200
     data = response.get_json()["data"]
@@ -64,14 +63,14 @@ def test_get_case_summary(client, mocker, session):
         "src.cases.service.case_service.CaseService.get_cases_by_user",
         return_value=[
             CaseSummary(
-                config_id='1',
+                task_id='1',
                 case_id=1,
                 patient_chief_complaint='Headache',
                 age='36',
                 gender='Male'
             ),
             CaseSummary(
-                config_id='2',
+                task_id='2',
                 case_id=2,
                 patient_chief_complaint='Cough',
                 age='30',
@@ -91,14 +90,14 @@ def test_get_case_summary(client, mocker, session):
         "error": None,
         "data": [
             {
-                "config_id": '1',
+                "task_id": '1',
                 "case_id": 1,
                 "patient_chief_complaint": "Headache",
                 "age": "36",
                 "gender": "Male"
             },
             {
-                "config_id": '2',
+                "task_id": '2',
                 "case_id": 2,
                 "patient_chief_complaint": "Cough",
                 "age": "30",

@@ -1,7 +1,8 @@
+import random
 from collections import defaultdict
+from datetime import datetime
 from operator import itemgetter
 
-from src.answer.repository.answer_repository import AnswerRepository
 from src.cases.controller.response.case_summary import CaseSummary
 from src.cases.model.case import Case, TreeNode
 from src.cases.repository.concept_repository import ConceptRepository
@@ -16,6 +17,7 @@ from src.common.exception.BusinessException import (BusinessException,
                                                     BusinessExceptionEnum)
 from src.common.repository.system_config_repository import \
     SystemConfigRepository
+from src.task.repository.task_repository import TaskRepository
 from src.user.repository.display_config_repository import \
     DisplayConfigRepository
 from src.user.utils.auth_utils import get_user_email_from_jwt
@@ -89,7 +91,7 @@ class CaseService:
         drug_exposure_repository: DrugExposureRepository,
         configuration_repository: DisplayConfigRepository,
         system_config_repository: SystemConfigRepository,
-        diagnose_repository: AnswerRepository,
+        task_repository: TaskRepository,
     ):
         self.person = None
         self.visit_occurrence_repository = visit_occurrence_repository
@@ -100,7 +102,7 @@ class CaseService:
         self.drug_exposure_repository = drug_exposure_repository
         self.configuration_repository = configuration_repository
         self.system_config_repository = system_config_repository
-        self.diagnose_repository = diagnose_repository
+        self.task_repository = task_repository
 
     def get_case_detail(self, case_id):
         page_config = self.get_page_configuration()
@@ -245,20 +247,18 @@ class CaseService:
     def get_page_configuration(self):
         return self.system_config_repository.get_config_by_id("page_config").json_config
 
-    def get_case_review(self, case_config_id):
-        configuration = self.configuration_repository.get_configuration_by_id(
-            case_config_id
-        )
+    def get_case_review(self, task_id):
+        task = self.random_assign_display(task_id)
+
         current_user = get_user_email_from_jwt()
-        if not configuration or configuration.user_email != current_user:
+        if not task or task.user_email != current_user:
             raise BusinessException(BusinessExceptionEnum.NoAccessToCaseReview)
 
-        path_configurations = configuration.path_config if configuration else None
-        case_details = self.get_case_detail(configuration.case_id)
+        case_details = self.get_case_detail(task.case_id)
 
         important_infos = []
-        if path_configurations:
-            for item in path_configurations:
+        if task.path_config:
+            for item in task.path_config:
                 if item.get("style"):
                     attach_style(item, case_details, important_infos)
 
@@ -269,29 +269,16 @@ class CaseService:
 
         return Case(
             self.person.person_source_value,
-            str(configuration.case_id),
+            str(task.case_id),
             case_details,
             list(sorted_important_infos),
         )
 
-    def __get_current_case_by_user(self, user_email) -> tuple:
-        case_config_pairs = (
-            self.configuration_repository.get_case_configurations_by_user(
-                user_email=user_email
-            )
-        )
-        completed_case_list = self.diagnose_repository.get_answered_case_list_by_user(
-            user_email=user_email
-        )
-
-        for case_id, config_id in case_config_pairs:
-            if config_id not in completed_case_list:
-                return case_id, config_id
-        return None, None
-
     def get_cases_by_user(self, user_email) -> list[CaseSummary]:
-        case_id, config_id = self.__get_current_case_by_user(user_email=user_email)
-        if not case_id or not config_id:
+        # TODO call random assign case function
+
+        task = self.task_repository.get_task_by_user(user_email)
+        if not task:
             return []
 
         cases_summary_list = []
@@ -301,14 +288,14 @@ class CaseService:
         ]
 
         visit_occurrence = self.visit_occurrence_repository.get_visit_occurrence(
-            case_id
+            task.case_id
         )
 
         person = self.person_repository.get_person(visit_occurrence.person_id)
         age = get_age(person, visit_occurrence)
         gender = self.get_concept_name(person.gender_concept_id)
         observations = self.observation_repository.get_observations_by_type(
-            case_id, chief_complaint_concept_ids
+            task.case_id, chief_complaint_concept_ids
         )
         patient_chief_complaint = []
         for obs in observations:
@@ -317,8 +304,8 @@ class CaseService:
                 patient_chief_complaint.append(concept_name)
 
         case_summary = CaseSummary(
-            config_id=config_id,
-            case_id=case_id,
+            task_id=task.id,
+            case_id=task.case_id,
             age=age,
             gender=gender,
             patient_chief_complaint=", ".join(patient_chief_complaint),
@@ -326,3 +313,17 @@ class CaseService:
         cases_summary_list.append(case_summary)
 
         return cases_summary_list
+
+    def random_assign_display(self, task_id):
+        task = self.task_repository.get_task(task_id)
+        if task is not None and task.path_config is None:
+            all_display_configurations = (
+                self.configuration_repository.get_all_configurations()
+            )
+            if all_display_configurations:
+                chosen_display = random.choice(all_display_configurations)
+                task.path_config = chosen_display.path_config
+            else:
+                task.path_config = []
+            task.review_started_timestamp = datetime.utcnow()
+        return task

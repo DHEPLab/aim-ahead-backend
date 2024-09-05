@@ -1,7 +1,6 @@
 from flask import Blueprint, jsonify
 
 from src import db
-from src.answer.repository.answer_repository import AnswerRepository
 from src.cases.repository.concept_repository import ConceptRepository
 from src.cases.repository.drug_exposure_repository import \
     DrugExposureRepository
@@ -14,6 +13,7 @@ from src.cases.service.case_service import CaseService
 from src.common.model.ApiResponse import ApiResponse
 from src.common.repository.system_config_repository import \
     SystemConfigRepository
+from src.task.repository.task_repository import TaskRepository
 from src.user.repository.display_config_repository import \
     DisplayConfigRepository
 from src.user.utils import auth_utils
@@ -28,7 +28,7 @@ person_repository = PersonRepository(db.session)
 drug_exposure_repository = DrugExposureRepository(db.session)
 configuration_repository = DisplayConfigRepository(db.session)
 system_config_repository = SystemConfigRepository(db.session)
-diagose_repository = AnswerRepository(db.session)
+task_repository = TaskRepository(db.session)
 case_service = CaseService(
     visit_occurrence_repository=visit_occurrence_repository,
     concept_repository=concept_repository,
@@ -38,14 +38,14 @@ case_service = CaseService(
     drug_exposure_repository=drug_exposure_repository,
     configuration_repository=configuration_repository,
     system_config_repository=system_config_repository,
-    diagnose_repository=diagose_repository,
+    task_repository=task_repository,
 )
 
 
-@case_blueprint.route("/case-reviews/<string:case_config_id>", methods=["GET"])
+@case_blueprint.route("/case-reviews/<string:task_id>", methods=["GET"])
 @jwt_validation_required()
-def get_case_detail(case_config_id):
-    case_review = case_service.get_case_review(case_config_id)
+def get_case_detail(task_id):
+    case_review = case_service.get_case_review(task_id)
     return jsonify(ApiResponse.success(case_review)), 200
 
 
