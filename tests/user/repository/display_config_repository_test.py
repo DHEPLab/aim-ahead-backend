@@ -48,3 +48,11 @@ def test_save_multiple_configurations(config_repository):
     assert any(
         config.id == "1" and config.path_config == [{'info': 'first'}] for
         config in all_configs)
+
+
+def test_get_configuration_by_id(config_repository):
+    new_config = DisplayConfig(id="1", path_config={'info': 'details'})
+    config_repository.save_configuration(new_config)
+    found = config_repository.get_configuration_by_id(new_config.id)
+
+    assert found.__eq__(new_config)

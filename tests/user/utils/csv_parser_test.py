@@ -26,9 +26,9 @@ def test_should_parse_csv_stream_correctly_when_all_config_are_set():
     len(result) == 1
     assert result_dicts[0]["id"] == "1"
     assert result_dicts[0]["path_config"] == [
-        {'path': 'Background.abc', 'style': {'collapse': True, 'highlight': True, 'top': "1"}},
-        {'path': 'background.xxx', 'style': {'collapse': True, 'highlight': False, 'top': "2"}},
-        {'path': 'Background.patient demo', 'style': {'collapse': False, 'highlight': False, "top": "1.5"}}
+        {'path': 'Background.abc', 'style': {'collapse': True, 'highlight': True, 'top': 1}},
+        {'path': 'background.xxx', 'style': {'collapse': True, 'highlight': False, 'top': 2}},
+        {'path': 'Background.patient demo', 'style': {'collapse': False, 'highlight': False, "top": 1.5}}
     ]
 
 
@@ -119,7 +119,7 @@ def test_invalid_non_number_top_config_should_raises_exception():
     stream = StringIO()
     writer = csv.writer(stream, delimiter=",")
     writer.writerow(['Config ID', 'Path', 'Collapse', 'Highlight', 'Top'])
-    writer.writerow(['1', 'Background.patient demo', None, None, 'abc'])
+    writer.writerow(['1', 'Root', None, None, '1'])
     stream.seek(0)
 
     with pytest.raises(BusinessException) as excinfo:

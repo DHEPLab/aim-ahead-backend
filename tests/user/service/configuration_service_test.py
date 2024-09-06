@@ -84,7 +84,3 @@ def test_database_save_error(mocker, mock_repo, valid_csv_file):
 
     with pytest.raises(InternalServerError):
         service.process_csv_file(valid_csv_file)
-
-    # assert response[0]["user_case_key"] == 'usera@example.com-1'
-    # assert response[0]["status"] == 'failed'
-    # mock_repo.clean_configurations.assert_called_once()

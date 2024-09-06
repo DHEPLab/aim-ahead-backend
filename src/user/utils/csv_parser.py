@@ -22,17 +22,19 @@ def str_to_bool(value):
     return True if value.lower() == "true" else False
 
 
+def string_to_num(value: str):
+    try:
+        return int(value)
+    except ValueError:
+        return float(value)
+
+
 def validate_top(row):
     path, top = row[H_PATH], row[H_TOP]
 
     if not is_empty(top):
         # The top config can not set on root node.
         if len(path.split(".")) < 2:
-            raise BusinessException(BusinessExceptionEnum.ConfigFileIncorrect)
-        # The top config only allow number as input.
-        try:
-            float(top)
-        except (ValueError, TypeError):
             raise BusinessException(BusinessExceptionEnum.ConfigFileIncorrect)
 
 
@@ -43,7 +45,7 @@ def build_style_dict(collapse, highlight, top) -> dict:
     if not is_empty(highlight):
         style["highlight"] = str_to_bool(highlight)
     if not is_empty(top):
-        style["top"] = top
+        style["top"] = string_to_num(top)
     return style
 
 
