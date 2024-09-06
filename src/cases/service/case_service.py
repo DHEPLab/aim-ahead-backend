@@ -17,12 +17,12 @@ from src.common.exception.BusinessException import (BusinessException,
                                                     BusinessExceptionEnum)
 from src.common.repository.system_config_repository import \
     SystemConfigRepository
+from src.task.assign_task import AssignTask
 from src.task.repository.task_repository import TaskRepository
 from src.user.repository.display_config_repository import \
     DisplayConfigRepository
+from src.user.repository.user_repository import UserRepository
 from src.user.utils.auth_utils import get_user_email_from_jwt
-from task.assign_task import AssignTask
-from user.repository.user_repository import UserRepository
 
 
 def group_by(source_list, key_selector):

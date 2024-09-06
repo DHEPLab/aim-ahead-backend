@@ -10,7 +10,6 @@ class Answer(db.Model):
 
     id: int = db.Column(db.Integer, primary_key=True, autoincrement=True)
     task_id: str = db.Column(db.String, unique=True)
-    case_id: int = db.Column(db.Integer)
     answer_config_id = db.Column(UUID(as_uuid=True), nullable=True)
     answer: dict = db.Column(db.JSON, nullable=True)
 

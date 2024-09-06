@@ -37,7 +37,6 @@ class AnswerService:
         answer_saved = self.answer_repository.add_answer(
             Answer(
                 task_id=task_id,
-                case_id=task.case_id,
                 answer_config_id=answer_config.id,
                 answer=answer,
             )

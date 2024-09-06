@@ -12,7 +12,6 @@ def answer_repository(session):
 def test_add_answer(answer_repository):
     answer = Answer(
         task_id='123',
-        case_id=1,
     )
 
     answer_repository.add_answer(answer)
