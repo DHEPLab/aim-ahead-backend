@@ -50,6 +50,7 @@ class BusinessExceptionEnum(Enum):
     )
     RenderTemplateError = ("1030", "Template render error.")
     SendEmailError = ("1040", "Email failed to send. Please try again.")
+    DisplayConfigIdNotUniqueError = ("1050", "Config ID should be unique.")
 
     def __init__(self, code: str, message: str):
         self._code = code

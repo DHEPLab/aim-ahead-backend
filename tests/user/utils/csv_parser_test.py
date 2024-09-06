@@ -140,3 +140,19 @@ def test_invalid_top_config_on_root_node_should_raises_exception():
         parse_csv_stream_to_configurations(stream)
 
     assert "Error while processing csv file, please check again." in str(excinfo.value.error.value)
+
+
+def test_config_id_not_unique_should_raises_exception():
+    # Prepare the test data
+    stream = StringIO()
+    writer = csv.writer(stream, delimiter=",")
+    writer.writerow(['Config ID', 'Path', 'Collapse', 'Highlight', 'Top'])
+    writer.writerow(['1', 'Background.patient demo', None, None, None])
+    writer.writerow(['2', 'Background.patient demo', None, True, None])
+    writer.writerow(['1', 'Background.drug', True, None, None])
+    stream.seek(0)
+
+    with pytest.raises(BusinessException) as excinfo:
+        parse_csv_stream_to_configurations(stream)
+
+    assert "Config ID should be unique." in str(excinfo.value.error.value)

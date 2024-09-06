@@ -72,6 +72,10 @@ class CsvConfigurationParser:
 
             self._process_path_config(row)
 
+        ids = [config.id for config in configurations]
+        if len(ids) > len(set(ids)):
+            raise BusinessException(BusinessExceptionEnum.DisplayConfigIdNotUniqueError)
+
         return configurations
 
     def _should_create_new_config(self, p_id, id):
