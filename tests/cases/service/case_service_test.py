@@ -26,6 +26,7 @@ from src.task.repository.task_repository import TaskRepository
 from src.user.model.display_config import DisplayConfig
 from src.user.repository.display_config_repository import \
     DisplayConfigRepository
+from src.task.task_manager import UserTaskResult
 from tests.cases.case_fixture import (concept_fixture, measurement_fixture,
                                       observation_fixture, person_fixture,
                                       visit_occurrence_fixture)
@@ -1190,6 +1191,8 @@ class TestGetCaseSummary:
         visit_occurrence_repository.get_visit_occurrence.return_value = None
         person_repository.get_person.return_value = None
         observation_repository.get_observations_by_type.return_value = []
+        mocker.patch('src.cases.service.case_service.TaskManager.get_or_create_user_task', return_value=UserTaskResult(task=None, is_new_assignment=False))
+
         case_service = CaseService(
             visit_occurrence_repository=visit_occurrence_repository,
             concept_repository=concept_repository,
@@ -1225,7 +1228,6 @@ class TestGetCaseSummary:
         }
         concept_repository.get_concept.side_effect = self.create_side_effect(concept_mapping)
 
-        task_repository.get_task_by_user.return_value = Task(id='101', case_id=1, user_email='goodbye@sunwukong.com', completed=False)
         visit_occurrence_repository.get_visit_occurrence.return_value = mocker.Mock(person_id=1)
         person_repository.get_person.return_value = mocker.Mock(year_of_birth=1984, gender_concept_id=2)
         observation_mapping = {
@@ -1235,6 +1237,8 @@ class TestGetCaseSummary:
         observation_repository.get_observations_by_type.side_effect = self.create_observation_side_effect(
             observation_mapping)
         mocker.patch('src.cases.service.case_service.get_age', return_value="36")
+        mocker.patch('src.cases.service.case_service.TaskManager.get_or_create_user_task', return_value=UserTaskResult(
+            task= Task(id='101', case_id=1, user_email='goodbye@sunwukong.com', completed=False), is_new_assignment=False))
 
         case_service = CaseService(
             visit_occurrence_repository=visit_occurrence_repository,
@@ -1298,6 +1302,8 @@ class TestGetCaseSummary:
         concept_repository.get_concept.side_effect = self.create_side_effect(concept_mapping)
 
         mocker.patch('src.cases.service.case_service.get_age', return_value="36")
+        mocker.patch('src.cases.service.case_service.TaskManager.get_or_create_user_task', return_value=UserTaskResult(
+            task= Task(id='101', case_id=1, user_email='goodbye@sunwukong.com', completed=False), is_new_assignment=False))
 
         result = case_service.get_cases_by_user("user@example.com")
         expected_patient_complaint = 'Cough, Fever'

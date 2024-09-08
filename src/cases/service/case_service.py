@@ -17,12 +17,12 @@ from src.common.exception.BusinessException import (BusinessException,
                                                     BusinessExceptionEnum)
 from src.common.repository.system_config_repository import \
     SystemConfigRepository
-from src.task.assign_task import AssignTask
 from src.task.repository.task_repository import TaskRepository
 from src.user.repository.display_config_repository import \
     DisplayConfigRepository
-from src.user.repository.user_repository import UserRepository
 from src.user.utils.auth_utils import get_user_email_from_jwt
+from task.task_manager import TaskManager
+from user.repository.user_repository import UserRepository
 
 
 def group_by(source_list, key_selector):
@@ -108,7 +108,7 @@ class CaseService:
         self.system_config_repository = system_config_repository
         self.task_repository = task_repository
         self.user_repository = user_repository
-        AssignTask.initialize(
+        TaskManager.initialize(
             user_repository, task_repository, visit_occurrence_repository
         )
 
@@ -283,12 +283,13 @@ class CaseService:
         )
 
     def get_cases_by_user(self, user_email) -> list[CaseSummary]:
-        assign_task = AssignTask.get_instance()
-        assign_task.random_assign_task_to_user(user_email)
+        task_manager = TaskManager.get_instance()
+        task_result = task_manager.get_or_create_user_task(user_email)
 
-        task = self.task_repository.get_task_by_user(user_email)
-        if not task:
+        if not task_result.task:
             return []
+        else:
+            task = task_result.task
 
         cases_summary_list = []
         page_config = self.get_page_configuration()

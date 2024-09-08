@@ -31,3 +31,10 @@ class TaskRepository:
             .filter(Task.user_email == user_email)
             .distinct()
         ]
+
+    def get_uncompleted_task_for_user(self, user_email: str) -> Task:
+        return (
+            self.session.query(Task)
+            .filter(Task.user_email == user_email, Task.completed == false())
+            .first()
+        )

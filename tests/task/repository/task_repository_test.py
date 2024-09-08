@@ -75,3 +75,4 @@ def test_get_assigned_case_ids_for_user_no_tasks(task_repository):
     case_ids = task_repository.get_assigned_case_ids_for_user(user_email)
     assert case_ids == []
 
+
