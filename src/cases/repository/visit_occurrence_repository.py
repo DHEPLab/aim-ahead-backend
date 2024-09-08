@@ -1,5 +1,7 @@
 from typing import List
 
+from sqlalchemy import select
+
 from src.cases.model.clinical_data.person.visit_occurrence import \
     VisitOccurrence
 
@@ -12,9 +14,5 @@ class VisitOccurrenceRepository:
         return self.session.get(VisitOccurrence, visit_id)
 
     def get_all_visit_occurrence_ids(self) -> List[int]:
-        return [
-            visit_id
-            for (visit_id,) in self.session.query(
-                VisitOccurrence.visit_occurrence_id
-            ).all()
-        ]
+        statement = select(VisitOccurrence.visit_occurrence_id)
+        return self.session.execute(statement).scalars().all()

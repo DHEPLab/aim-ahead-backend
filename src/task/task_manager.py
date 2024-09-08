@@ -53,9 +53,7 @@ class TaskManager:
         if not user:
             raise BusinessException(BusinessExceptionEnum.UserNotInPilot)
 
-        uncompleted_task = self.task_repository.get_uncompleted_task_for_user(
-            user_email
-        )
+        uncompleted_task = self.task_repository.get_task_by_user(user_email)
         print("uncompleted_task", uncompleted_task)
         if uncompleted_task:
             return UserTaskResult(task=uncompleted_task, is_new_assignment=False)
