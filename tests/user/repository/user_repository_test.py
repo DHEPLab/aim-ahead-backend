@@ -7,9 +7,7 @@ from src.user.model.user import User
 
 @pytest.fixture(scope="session")
 def user_repository(session):
-    repo=UserRepository(session)
-    session.query(User).delete()
-    session.commit()
+    repo = UserRepository(session)
     return repo
 
 
