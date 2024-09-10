@@ -2,6 +2,7 @@ from src.answer.model.answer import Answer
 from src.answer.repository.answer_repository import AnswerRepository
 from src.common.exception.BusinessException import (BusinessException,
                                                     BusinessExceptionEnum)
+from src.common.exception.db_transaction import db_transaction
 from src.configration.repository.answer_config_repository import \
     AnswerConfigurationRepository
 from src.task.repository.task_repository import TaskRepository
@@ -19,6 +20,7 @@ class AnswerService:
         self.answer_config_repository = answer_config_repository
         self.task_repository = task_repository
 
+    @db_transaction()
     def add_answer_response(self, task_id: str, data: dict):
         user_email = auth_utils.get_user_email_from_jwt()
         answer = data["answer"]
