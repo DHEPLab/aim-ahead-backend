@@ -2,6 +2,8 @@ import logging
 import random
 from typing import NamedTuple, Optional
 
+from sqlalchemy.exc import IntegrityError
+
 from src.cases.repository.visit_occurrence_repository import \
     VisitOccurrenceRepository
 from src.common.exception.BusinessException import (BusinessException,
@@ -83,6 +85,11 @@ class TaskManager:
                 f"New task for visit {selected_visit} assigned to user {user_email}"
             )
             return created_task
+        except IntegrityError as e:
+            self.logger.error(
+                f"creating same task for user {user_email}, case {selected_visit}: {str(e)}"
+            )
+            return None
         except Exception as e:
             self.logger.error(
                 f"Error creating task for user {user_email}, case {selected_visit}: {str(e)}"

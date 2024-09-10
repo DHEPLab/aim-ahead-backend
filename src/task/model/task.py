@@ -1,7 +1,6 @@
 import uuid
 from datetime import datetime
 
-from sqlalchemy import Index
 from sqlalchemy.dialects.postgresql import UUID
 
 from src import db
@@ -22,4 +21,6 @@ class Task(db.Model):
         db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow
     )
 
-    __table_args__ = (Index(None, "user_email", "case_id"),)
+    __table_args__ = (
+        db.UniqueConstraint("user_email", "case_id", name="uq_user_email_case_id"),
+    )
