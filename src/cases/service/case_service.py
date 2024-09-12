@@ -5,6 +5,8 @@ from operator import itemgetter
 
 from src.cases.controller.response.case_summary import CaseSummary
 from src.cases.model.case import Case, TreeNode
+from src.cases.repository.case_prediction_repository import \
+    CasePredictionRepository
 from src.cases.repository.concept_repository import ConceptRepository
 from src.cases.repository.drug_exposure_repository import \
     DrugExposureRepository
@@ -95,6 +97,7 @@ class CaseService:
         system_config_repository: SystemConfigRepository,
         task_repository: TaskRepository,
         user_repository: UserRepository,
+        case_prediction_repository: CasePredictionRepository,
     ):
         self.user_repository = None
         self.person = None
@@ -108,6 +111,7 @@ class CaseService:
         self.system_config_repository = system_config_repository
         self.task_repository = task_repository
         self.user_repository = user_repository
+        self.case_prediction_repository = case_prediction_repository
         TaskManager.initialize(
             user_repository, task_repository, visit_occurrence_repository
         )
@@ -337,3 +341,6 @@ class CaseService:
                 task.path_config = []
             task.review_started_timestamp = datetime.utcnow()
         return task
+
+    def get_case_prediction(self, case_id: int):
+        return self.case_prediction_repository.get_prediction_by_case_id(case_id)

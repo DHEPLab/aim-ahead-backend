@@ -50,7 +50,7 @@ from src.configration.model import answer_config
 # task
 from src.task.model import task
 
-from src.cases.model.prediction.case_prediction import CasePrediction
+from src.cases.model.case_prediction import CasePrediction
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
