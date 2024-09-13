@@ -26,15 +26,9 @@ def string_to_num(value: str):
     try:
         return int(value)
     except ValueError:
-        return float(value)
-
-
-def validate_top(row):
-    path, top = row[H_PATH], row[H_TOP]
-
-    if not is_empty(top):
-        # The top config can not set on root node.
-        if len(path.split(".")) < 2:
+        try:
+            return float(value)
+        except (ValueError, TypeError):
             raise BusinessException(BusinessExceptionEnum.ConfigFileIncorrect)
 
 
@@ -62,8 +56,6 @@ class CsvConfigurationParser:
         p_id = None
 
         for row in self.csv_data:
-            validate_top(row)
-
             id = row[H_ID]
             if self._should_create_new_config(p_id, id):
                 p_id = id

@@ -85,6 +85,8 @@ def add_if_value_present(data, node):
 
 
 class CaseService:
+    AI_PREDICTION = "AI Prediction"
+
     def __init__(
         self,
         visit_occurrence_repository: VisitOccurrenceRepository,
@@ -128,6 +130,10 @@ class CaseService:
             add_if_value_present(
                 data, TreeNode(key, title_resolvers[key](case_id, title_config))
             )
+
+        case_prediction = self.get_case_prediction(case_id)
+        if case_prediction and case_prediction.important_note:
+            data.append(TreeNode(self.AI_PREDICTION, case_prediction.important_note))
         return data
 
     def get_nodes_of_measurement(self, case_id, title_config):
@@ -267,10 +273,21 @@ class CaseService:
             raise BusinessException(BusinessExceptionEnum.NoAccessToCaseReview)
 
         case_details = self.get_case_detail(task.case_id)
+        case_display, important_infos = self.get_case_display(
+            task.path_config, case_details
+        )
 
+        return Case(
+            self.person.person_source_value,
+            str(task.case_id),
+            case_display,
+            important_infos,
+        )
+
+    def get_case_display(self, path_config, case_details):
         important_infos = []
-        if task.path_config:
-            for item in task.path_config:
+        if path_config:
+            for item in path_config:
                 if item.get("style"):
                     attach_style(item, case_details, important_infos)
 
@@ -278,13 +295,9 @@ class CaseService:
         sorted_important_infos = map(
             lambda e: TreeNode(e["key"], e["values"]), important_infos
         )
+        case_display = [node for node in case_details if node.key != self.AI_PREDICTION]
 
-        return Case(
-            self.person.person_source_value,
-            str(task.case_id),
-            case_details,
-            list(sorted_important_infos),
-        )
+        return case_display, list(sorted_important_infos)
 
     def get_cases_by_user(self, user_email) -> list[CaseSummary]:
         task_manager = TaskManager.get_instance()

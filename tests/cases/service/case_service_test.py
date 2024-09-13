@@ -32,7 +32,7 @@ from src.task.task_manager import UserTaskResult
 from tests.cases.case_fixture import (concept_fixture, measurement_fixture,
                                       observation_fixture, person_fixture,
                                       visit_occurrence_fixture)
-from user.repository.user_repository import UserRepository
+from src.user.repository.user_repository import UserRepository
 
 
 class TestGroupBy:
@@ -203,6 +203,7 @@ def mock_repos(mocker):
     observation_repository.get_observations_by_type.return_value = []
     measurement_repository.get_measurements.return_value = []
     measurement_repository.get_measurements_of_parents.return_value = []
+    case_prediction_repository.get_prediction_by_case_id.return_value = None
     system_config_repository.get_config_by_id.return_value = SystemConfig(
         id="page_config",
         json_config={
@@ -539,10 +540,10 @@ class TestGetCaseDetail:
         )
 
         case_prediction_repository.get_prediction_by_case_id.return_value = None
-        assert case_service.get_case_prediction("1") is None
+        assert case_service.get_case_prediction(1) is None
 
-        case_prediction_repository.get_prediction_by_case_id.return_value = CasePrediction("1", "case prediction free text")
-        assert case_service.get_case_prediction("1") is not None
+        case_prediction_repository.get_prediction_by_case_id.return_value = CasePrediction(1, "case prediction free text")
+        assert case_service.get_case_prediction(1) is not None
 
 
 class TestGetValue:
@@ -1224,6 +1225,81 @@ class TestGetCaseReview:
             ],
             importantInfos=[
                 TreeNode("Gender", "test"),
+                TreeNode("Age", "36"),
+                TreeNode(
+                    "ignore",
+                    [TreeNode("Age", "36", {"top": 2}), TreeNode("Gender", "test", {"top": 0})],
+                )
+            ]
+        )
+
+    def test_get_case_review_when_config_ai_prediction(self, mocker):
+        (
+            concept_repository,
+            configuration_repository,
+            drug_exposure_repository,
+            measurement_repository,
+            observation_repository,
+            person_repository,
+            visit_occurrence_repository,
+            system_config_repository,
+            task_repository,
+            user_repository,
+            case_prediction_repository
+        ) = mock_repos(mocker)
+        task_repository.get_task.return_value = Task(id='101', case_id=1, user_email='goodbye@sunwukong.com', completed=False, path_config=[
+            {
+                "path": "BACKGROUND.Patient Demographics",
+                "style": {"collapse": True, "top": 3},
+            },
+            {
+                "path": "BACKGROUND.Patient Demographics.Age",
+                "style": {"top": 2},
+            },
+            {
+                "path": "BACKGROUND.Patient Demographics.Gender",
+                "style": {"top": 0},
+            },
+            {
+                "path": "AI Prediction",
+                "style": {"top": 1},
+            },
+        ])
+        case_prediction_repository.get_prediction_by_case_id.return_value = CasePrediction(1, "case prediction free text")
+        case_service = CaseService(
+            visit_occurrence_repository=visit_occurrence_repository,
+            concept_repository=concept_repository,
+            measurement_repository=measurement_repository,
+            observation_repository=observation_repository,
+            person_repository=person_repository,
+            drug_exposure_repository=drug_exposure_repository,
+            configuration_repository=configuration_repository,
+            system_config_repository=system_config_repository,
+            task_repository=task_repository,
+            user_repository=user_repository,
+            case_prediction_repository=case_prediction_repository
+        )
+
+        case_review = case_service.get_case_review(1)
+
+        assert case_review == Case(
+            personName='sunwukong',
+            caseNumber='1',
+            details=[
+                TreeNode(
+                    "BACKGROUND",
+                    [
+                        TreeNode(
+                            "Patient Demographics",
+                            [TreeNode("Age", "36", {"top": 2}), TreeNode("Gender", "test", {"top": 0})],
+                            {"collapse": True, "top": 3},
+                        )
+                    ],
+                )
+            ],
+            importantInfos=[
+                TreeNode("Gender", "test"),
+                TreeNode("AI Prediction", "case prediction free text"),
                 TreeNode("Age", "36"),
                 TreeNode(
                     "ignore",
