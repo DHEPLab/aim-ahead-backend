@@ -1,11 +1,10 @@
 from dataclasses import dataclass
-from typing import Self
 
 
 @dataclass
 class TreeNode:
     key: str
-    values: str | list[str] | list[Self] | None
+    values: str | list | None
     style: dict | None = None
 
     def add_node(self, children):
