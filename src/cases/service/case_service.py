@@ -26,6 +26,8 @@ from src.user.repository.display_config_repository import \
 from src.user.repository.user_repository import UserRepository
 from src.user.utils.auth_utils import get_user_email_from_jwt
 
+AI_PREDICTION = "AI Prediction"
+
 
 def group_by(source_list, key_selector):
     target_list = defaultdict(list)
@@ -69,7 +71,11 @@ def attach_style(display_configuration, case_details, important_infos):
                     if node.style.get("top") is not None:
                         important_infos.append(
                             {
-                                "key": "ignore" if level == 2 else node.key,
+                                "key": (
+                                    "ignore"
+                                    if level == 2 or node.key == AI_PREDICTION
+                                    else node.key
+                                ),
                                 "values": node.values,
                                 "weight": node.style["top"],
                             }
@@ -85,7 +91,6 @@ def add_if_value_present(data, node):
 
 
 class CaseService:
-    AI_PREDICTION = "AI Prediction"
 
     def __init__(
         self,
@@ -133,7 +138,7 @@ class CaseService:
 
         case_prediction = self.get_case_prediction(case_id)
         if case_prediction and case_prediction.important_note:
-            data.append(TreeNode(self.AI_PREDICTION, case_prediction.important_note))
+            data.append(TreeNode(AI_PREDICTION, case_prediction.important_note))
         return data
 
     def get_nodes_of_measurement(self, case_id, title_config):
@@ -284,7 +289,8 @@ class CaseService:
             important_infos,
         )
 
-    def get_case_display(self, path_config, case_details):
+    @staticmethod
+    def get_case_display(path_config, case_details):
         important_infos = []
         if path_config:
             for item in path_config:
@@ -295,7 +301,7 @@ class CaseService:
         sorted_important_infos = map(
             lambda e: TreeNode(e["key"], e["values"]), important_infos
         )
-        case_display = [node for node in case_details if node.key != self.AI_PREDICTION]
+        case_display = [node for node in case_details if node.key != AI_PREDICTION]
 
         return case_display, list(sorted_important_infos)
 

@@ -1299,7 +1299,7 @@ class TestGetCaseReview:
             ],
             importantInfos=[
                 TreeNode("Gender", "test"),
-                TreeNode("AI Prediction", "case prediction free text"),
+                TreeNode("ignore", "case prediction free text"),
                 TreeNode("Age", "36"),
                 TreeNode(
                     "ignore",
