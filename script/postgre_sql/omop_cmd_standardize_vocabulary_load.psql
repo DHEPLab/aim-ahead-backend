@@ -35,3 +35,7 @@
 \COPY observation FROM '$OMOP_DATA_SOURCE_PATH/observation.csv' WITH DELIMITER ',' CSV HEADER;
 
 \COPY measurement FROM '$OMOP_DATA_SOURCE_PATH/measurement.csv' WITH DELIMITER ',' CSV HEADER;
+
+------------------------------ AI prediction data ------------------------------
+
+\COPY case_prediction FROM '$OMOP_DATA_SOURCE_PATH/case_prediction.csv' WITH DELIMITER ',' CSV HEADER;
